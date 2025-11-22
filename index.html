@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#2e3192" />
+    <meta name="description" content="BongoNews - Your trusted source for local Bengali news, covering Kolkata, Districts, and State updates." />
+    
+    <!-- Open Graph / Facebook / WhatsApp Sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="BongoNews - Premium Local Bengali News" />
+    <meta property="og:description" content="Latest updates from Kolkata, West Bengal, and your local area." />
+    <meta property="og:image" content="https://picsum.photos/1200/630?random=logo" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    
+    <title>BongoNews</title>
+    
+    <!-- PWA Manifest Placeholder -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- GOOGLE ADSENSE PLACEHOLDER -->
+    <!-- Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your actual AdSense Client ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              royal: {
+                50: '#f0f1ff',
+                100: '#e0e3ff',
+                500: '#4f56ff',
+                600: '#2e3192', // Brand Royal Blue
+                700: '#242673',
+                900: '#121212', // Dark mode bg
+              },
+              bengal: {
+                400: '#ffcd33',
+                500: '#ffb800', // Brand Gold
+                600: '#e6a600',
+              }
+            },
+            fontFamily: {
+              sans: ['"Hind Siliguri"', 'sans-serif'],
+              serif: ['"Noto Serif Bengali"', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
+      /* Mobile Tap Highlight Removal */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-royal-900 dark:text-slate-100 transition-colors duration-300 font-sans antialiased selection:bg-bengal-500/30">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "Copy of BongoNews - Premium Local Bengali News",
+  "description": "A premium, modern Bengali news application featuring AI-powered transcription workflow and an elegant reading experience.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
