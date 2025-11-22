@@ -7,6 +7,7 @@ export const DEFAULT_VPS_KEY = "demo-key";
 
 // Categories for the Tabs
 export const CATEGORIES = [
+  Category.TRENDING,
   Category.BREAKING,
   Category.KOLKATA,
   Category.DISTRICT,
@@ -28,7 +29,12 @@ export const INITIAL_NEWS: NewsItem[] = [
     imageUrl: getAiImage('Kolkata Metro Station Inauguration crowd ribbon cutting photorealistic'),
     createdAt: Date.now() - 120000, // 2 mins ago
     readTime: '3 min',
-    views: 1205
+    views: 1205,
+    likes: 342,
+    comments: [
+      { id: 'c1', user: 'Raju Das', text: 'খুব ভালো খবর! অনেক সুবিধা হবে।', timestamp: Date.now() - 60000 },
+      { id: 'c2', user: 'Soma Dey', text: 'ভাড়া কত হবে?', timestamp: Date.now() - 30000 }
+    ]
   },
   {
     id: '2',
@@ -40,7 +46,9 @@ export const INITIAL_NEWS: NewsItem[] = [
     imageUrl: getAiImage('Hazarduari Palace Murshidabad historic india building sunny day tourists'),
     createdAt: Date.now() - 300000, // 5 mins ago
     readTime: '4 min',
-    views: 850
+    views: 850,
+    likes: 120,
+    comments: []
   },
   {
     id: '3',
@@ -52,7 +60,11 @@ export const INITIAL_NEWS: NewsItem[] = [
     imageUrl: getAiImage('Darjeeling tea garden snow mountain kanchenjunga view'),
     createdAt: Date.now() - 600000, // 10 mins ago
     readTime: '2 min',
-    views: 3400
+    views: 3400,
+    likes: 890,
+    comments: [
+      { id: 'c3', user: 'Travel Lover', text: 'যাব ভাবছি আগামী সপ্তাহে।', timestamp: Date.now() - 100000 }
+    ]
   },
   {
     id: '4',
@@ -64,7 +76,9 @@ export const INITIAL_NEWS: NewsItem[] = [
     imageUrl: getAiImage('West Bengal government official camp village crowd india'),
     createdAt: Date.now() - 900000, // 15 mins ago
     readTime: '5 min',
-    views: 920
+    views: 920,
+    likes: 45,
+    comments: []
   },
   {
     id: '5',
@@ -76,7 +90,9 @@ export const INITIAL_NEWS: NewsItem[] = [
     imageUrl: getAiImage('Kolkata city street rain storm dark clouds victoria memorial'),
     createdAt: Date.now() - 1200000, // 20 mins ago
     readTime: '2 min',
-    views: 1500
+    views: 1500,
+    likes: 210,
+    comments: []
   },
   {
     id: '6',
@@ -89,6 +105,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     createdAt: Date.now() - 1500000, 
     readTime: '1 min',
     views: 5000,
+    likes: 150,
+    comments: [],
     isSponsored: true
   },
   {
@@ -102,6 +120,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     createdAt: Date.now() - 1800000,
     readTime: '5 min',
     views: 2300,
+    likes: 67,
+    comments: [],
     affiliate: {
       link: 'https://amazon.in',
       text: 'Check Best Price on Amazon'

@@ -1,3 +1,10 @@
+export interface Comment {
+  id: string;
+  user: string;
+  text: string;
+  timestamp: number;
+}
+
 export interface NewsItem {
   id: string;
   headline: string;
@@ -8,7 +15,9 @@ export interface NewsItem {
   imageUrl?: string;
   createdAt: number;
   readTime?: string;
-  views?: number;
+  views: number;
+  likes: number;
+  comments: Comment[];
   isSponsored?: boolean; // For monetization
   affiliate?: {
     link: string;
@@ -18,7 +27,8 @@ export interface NewsItem {
 
 export enum Category {
   ALL = 'All News',
-  MY_AREA = 'My Area', // Special dynamic category
+  TRENDING = 'Trending', // New Dynamic Category
+  MY_AREA = 'My Area', 
   KOLKATA = 'Kolkata',
   DISTRICT = 'Districts',
   STATE = 'West Bengal',

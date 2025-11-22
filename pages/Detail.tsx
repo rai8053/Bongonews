@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getNews, getNewsById } from '../services/storageService';
-import { NewsItem } from '../types';
-import { ArrowLeft, Share2, Calendar, Eye, ShoppingCart, ExternalLink, Copy, Check } from 'lucide-react';
+import { getNews, getNewsById, incrementView, addComment, toggleLikeNews, isNewsLikedByUser } from '../services/storageService';
+import { NewsItem, Comment } from '../types';
+import { ArrowLeft, Share2, Calendar, Eye, ShoppingCart, ExternalLink, Copy, Check, Heart, MessageCircle, Send, UserCircle } from 'lucide-react';
 import AdBanner from '../components/AdBanner';
 import NewsCard from '../components/NewsCard';
 
@@ -11,34 +11,46 @@ const Detail: React.FC = () => {
   const [news, setNews] = useState<NewsItem | null>(null);
   const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
   const [copied, setCopied] = useState(false);
+  
+  // Engagement State
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [commentText, setCommentText] = useState('');
+  const [userName, setUserName] = useState('');
+  const [comments, setComments] = useState<Comment[]>([]);
 
   useEffect(() => {
     if (id) {
+      // 1. Increment View
+      incrementView(id);
+      
+      // 2. Load Data
       const item = getNewsById(id);
       if (item) {
         setNews(item);
-        window.scrollTo(0, 0);
+        setIsLiked(isNewsLikedByUser(id));
+        setLikeCount(item.likes || 0);
+        setComments(item.comments || []);
         
-        // Dynamic Title for SEO
+        window.scrollTo(0, 0);
         document.title = `${item.headline} | BongoNews`;
         
-        // Fetch real related news (same category, excluding current)
+        // 3. Fetch Related
         const allNews = getNews();
         const related = allNews
           .filter(n => n.category === item.category && n.id !== item.id)
-          .sort(() => 0.5 - Math.random()) // Random shuffle
+          .sort(() => 0.5 - Math.random()) 
           .slice(0, 3);
         setRelatedNews(related);
       }
     }
     return () => {
-      document.title = "BongoNews"; // Reset on unmount
+      document.title = "BongoNews"; 
     };
   }, [id]);
 
   const handleNativeShare = async () => {
     if (!news) return;
-
     if (navigator.share) {
       try {
         await navigator.share({
@@ -50,7 +62,6 @@ const Detail: React.FC = () => {
         console.log('Error sharing', error);
       }
     } else {
-      // Fallback: Copy to clipboard
       handleCopyLink();
     }
   };
@@ -62,6 +73,30 @@ const Detail: React.FC = () => {
     alert("লিঙ্ক কপি করা হয়েছে (Link Copied)");
   };
 
+  const handleLike = () => {
+    if (!news) return;
+    const result = toggleLikeNews(news.id);
+    setIsLiked(result.isLiked);
+    setLikeCount(result.newCount);
+  };
+
+  const handlePostComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!news || !commentText.trim() || !userName.trim()) return;
+
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      user: userName,
+      text: commentText,
+      timestamp: Date.now()
+    };
+
+    addComment(news.id, newComment);
+    setComments([newComment, ...comments]);
+    setCommentText('');
+    setUserName('');
+  };
+
   if (!news) {
     return <div className="p-10 text-center">Loading...</div>;
   }
@@ -69,7 +104,7 @@ const Detail: React.FC = () => {
   return (
     <div className="pb-24 bg-white dark:bg-royal-900 min-h-screen">
       {/* Header Image */}
-      <div className="w-full h-[40vh] md:h-[50vh] relative">
+      <div className="w-full h-[40vh] md:h-[50vh] relative group">
         <img 
           src={news.imageUrl || 'https://picsum.photos/1200/800'} 
           alt={news.headline} 
@@ -79,12 +114,22 @@ const Detail: React.FC = () => {
         <Link to="/" className="absolute top-4 left-4 p-2 bg-black/30 backdrop-blur-md rounded-full text-white hover:bg-black/50 transition">
           <ArrowLeft className="w-6 h-6" />
         </Link>
+
+        {/* Floating Like Button (Desktop/Image overlay) */}
+        <button 
+          onClick={handleLike}
+          className="absolute bottom-[-20px] right-8 p-4 rounded-full shadow-xl transition-transform transform active:scale-90 z-20 flex items-center justify-center bg-white dark:bg-royal-800 text-royal-600 dark:text-white"
+        >
+           <Heart className={`w-8 h-8 ${isLiked ? 'fill-red-500 text-red-500' : 'text-slate-300'}`} />
+        </button>
       </div>
 
       <div className="max-w-3xl mx-auto px-5 -mt-20 relative z-10">
-        <span className="inline-block px-3 py-1 bg-bengal-500 text-royal-900 text-xs font-bold rounded-full mb-4 shadow-lg">
-          {news.category}
-        </span>
+        <div className="flex justify-between items-start">
+          <span className="inline-block px-3 py-1 bg-bengal-500 text-royal-900 text-xs font-bold rounded-full mb-4 shadow-lg">
+            {news.category}
+          </span>
+        </div>
         
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-slate-900 dark:text-white leading-tight mb-6 drop-shadow-sm">
           {news.headline}
@@ -97,11 +142,14 @@ const Detail: React.FC = () => {
            </div>
            <div className="flex items-center gap-1">
              <Eye className="w-4 h-4" />
-             {news.views || 0} বার পঠিত
+             {(news.views || 0) + 1} বার পঠিত
+           </div>
+           <div className="flex items-center gap-1 text-red-500 font-bold">
+             <Heart className="w-4 h-4 fill-current" /> {likeCount} Likes
            </div>
         </div>
 
-        {/* Affiliate CTA - Sticky Style */}
+        {/* Affiliate CTA */}
         {news.affiliate && (
           <div className="mb-8 p-5 bg-bengal-50 dark:bg-royal-800 border border-bengal-200 dark:border-royal-700 rounded-xl flex items-center justify-between shadow-sm">
             <div>
@@ -129,46 +177,67 @@ const Detail: React.FC = () => {
           ))}
         </article>
 
-        {/* Affiliate CTA - Bottom Repeat */}
-        {news.affiliate && (
-          <div className="my-8 text-center">
-             <a 
-              href={news.affiliate.link} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-bengal-500 text-royal-900 font-bold text-lg rounded-full shadow-xl hover:shadow-2xl hover:bg-bengal-400 transition-all"
-            >
-              {news.affiliate.text || 'Check Price'} <ExternalLink className="w-5 h-5" />
-            </a>
-          </div>
-        )}
-
-        {/* Share Buttons */}
-        <div className="my-10 p-6 bg-slate-50 dark:bg-royal-800/50 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="font-bold text-slate-700 dark:text-slate-300">শেয়ার করুন (Share):</span>
-          <div className="flex gap-3">
-            <button 
-              onClick={handleNativeShare}
-              className="px-4 py-2 bg-[#25D366] text-white rounded-full font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition"
-            >
-              <Share2 className="w-4 h-4" /> WhatsApp
-            </button>
-            <button 
-              onClick={handleNativeShare}
-              className="px-4 py-2 bg-[#1877F2] text-white rounded-full font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition"
-            >
-              <Share2 className="w-4 h-4" /> Facebook
-            </button>
-             <button 
-              onClick={handleCopyLink}
-              className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full font-medium text-sm flex items-center gap-2 shadow-md hover:shadow-lg transition"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />} Copy
-            </button>
-          </div>
-        </div>
-
         <AdBanner variant="box" />
+
+        {/* --- COMMENTS SECTION --- */}
+        <div className="mt-10 bg-slate-50 dark:bg-royal-800/30 p-6 rounded-xl border border-slate-100 dark:border-royal-700">
+           <h3 className="text-xl font-bold font-serif mb-6 flex items-center gap-2 dark:text-white">
+             <MessageCircle className="w-5 h-5" /> মন্তব্য ({comments.length})
+           </h3>
+
+           {/* Comment Form */}
+           <form onSubmit={handlePostComment} className="mb-8 bg-white dark:bg-royal-800 p-4 rounded-lg shadow-sm">
+              <div className="mb-3">
+                <input 
+                  type="text" 
+                  placeholder="আপনার নাম (Name)"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="w-full p-2 border-b border-slate-200 dark:border-royal-600 dark:bg-royal-800 focus:outline-none focus:border-royal-500 text-sm dark:text-white"
+                />
+              </div>
+              <div className="flex gap-2">
+                 <textarea 
+                    placeholder="আপনার মতামত লিখুন..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    className="flex-1 p-2 bg-slate-50 dark:bg-royal-900 rounded-lg text-sm focus:ring-1 focus:ring-royal-500 outline-none dark:text-white"
+                    rows={2}
+                 />
+                 <button 
+                   type="submit"
+                   disabled={!commentText.trim() || !userName.trim()}
+                   className="bg-royal-600 text-white p-3 rounded-lg hover:bg-royal-700 disabled:opacity-50 transition"
+                 >
+                    <Send className="w-5 h-5" />
+                 </button>
+              </div>
+           </form>
+
+           {/* Comment List */}
+           <div className="space-y-4">
+              {comments.length > 0 ? (
+                comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-3">
+                    <div className="mt-1">
+                      <UserCircle className="w-8 h-8 text-slate-300 dark:text-royal-600" />
+                    </div>
+                    <div className="bg-white dark:bg-royal-800 p-3 rounded-lg rounded-tl-none shadow-sm border border-slate-100 dark:border-royal-700 flex-1">
+                       <div className="flex justify-between items-center mb-1">
+                         <span className="font-bold text-sm dark:text-slate-200">{comment.user}</span>
+                         <span className="text-[10px] text-slate-400">
+                           {new Date(comment.timestamp).toLocaleDateString()}
+                         </span>
+                       </div>
+                       <p className="text-sm text-slate-700 dark:text-slate-300">{comment.text}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-slate-400 text-sm italic py-4">এখনও কেউ মন্তব্য করেননি। আপনিই প্রথম মন্তব্য করুন!</p>
+              )}
+           </div>
+        </div>
 
         {/* Related / Read Next */}
         <div className="mt-12 border-t border-slate-200 dark:border-royal-700 pt-8">

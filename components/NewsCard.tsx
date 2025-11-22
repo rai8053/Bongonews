@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { NewsItem } from '../types';
-import { Clock, Share2, Bookmark, Star, ShoppingBag, ExternalLink } from 'lucide-react';
+import { Clock, Share2, Bookmark, Star, ShoppingBag, MessageCircle, Heart, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { toggleBookmark, isBookmarked } from '../services/storageService';
+import { toggleBookmark, isBookmarked, toggleLikeNews, isNewsLikedByUser } from '../services/storageService';
 
 interface NewsCardProps {
   item: NewsItem;
@@ -11,15 +11,18 @@ interface NewsCardProps {
 
 const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
   const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(item.likes || 0);
   const [imgSrc, setImgSrc] = useState(item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`);
 
   useEffect(() => {
     setSaved(isBookmarked(item.id));
+    setLiked(isNewsLikedByUser(item.id));
+    setLikeCount(item.likes || 0);
     setImgSrc(item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`);
-  }, [item.id, item.imageUrl]);
+  }, [item.id, item.imageUrl, item.likes]);
 
   const handleImageError = () => {
-    // Fallback if AI image fails
     setImgSrc(`https://picsum.photos/seed/${item.id}/800/400`);
   };
 
@@ -28,6 +31,14 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     e.stopPropagation();
     const newState = toggleBookmark(item.id);
     setSaved(newState);
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = toggleLikeNews(item.id);
+    setLiked(result.isLiked);
+    setLikeCount(result.newCount);
   };
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -53,6 +64,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     return new Intl.DateTimeFormat('bn-BD', { hour: 'numeric', minute: 'numeric' }).format(date);
   };
 
+  // --- Sponsored Card ---
   if (item.isSponsored) {
     return (
       <Link to={`/news/${item.id}`} className="block mb-4">
@@ -89,6 +101,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     );
   }
 
+  // --- Featured Card ---
   if (featured) {
     return (
       <Link to={`/news/${item.id}`} className="block group">
@@ -108,15 +121,20 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
             </h2>
             <div className="flex items-center gap-4 text-slate-300 text-sm">
               <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatTime(item.createdAt)}</span>
-              <span>•</span>
-              <span>{item.readTime || '3 min'} read</span>
+              <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {item.views}</span>
               
-              <button 
-                onClick={handleBookmark}
-                className="ml-auto p-2 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <Bookmark className={`w-5 h-5 ${saved ? 'fill-bengal-500 text-bengal-500' : 'text-white'}`} />
-              </button>
+              <div className="flex items-center gap-3 ml-auto">
+                 <button onClick={handleLike} className="flex items-center gap-1 hover:text-white transition">
+                    <Heart className={`w-5 h-5 ${liked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+                    <span>{likeCount}</span>
+                 </button>
+                 <button 
+                    onClick={handleBookmark}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                 >
+                    <Bookmark className={`w-5 h-5 ${saved ? 'fill-bengal-500 text-bengal-500' : 'text-white'}`} />
+                 </button>
+              </div>
             </div>
           </div>
         </div>
@@ -124,6 +142,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     );
   }
 
+  // --- Standard Card ---
   return (
     <Link to={`/news/${item.id}`} className="flex gap-4 p-4 bg-white dark:bg-royal-800/50 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-royal-800 transition-all duration-300 border border-slate-100 dark:border-royal-700/50 relative">
       <div className="w-1/3 aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 relative">
@@ -147,16 +166,26 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
           </p>
         </div>
         <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {formatTime(item.createdAt)}
-          </span>
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <span className="flex items-center gap-1">
+               <Clock className="w-3 h-3" /> {formatTime(item.createdAt)}
+            </span>
+          </div>
           
           {item.affiliate ? (
             <span className="flex items-center gap-1 text-xs font-bold text-bengal-600 dark:text-bengal-500 bg-bengal-50 dark:bg-bengal-900/20 px-2 py-1 rounded-full">
               <ShoppingBag className="w-3 h-3" /> Shop
             </span>
           ) : (
-            <div className="flex gap-3 text-slate-400">
+            <div className="flex gap-3 text-slate-400 items-center">
+               {/* Engagement Metrics */}
+               <div className="flex items-center gap-1 text-xs mr-1">
+                 <Heart className={`w-3 h-3 ${liked ? 'fill-red-500 text-red-500' : ''}`} /> {likeCount}
+               </div>
+               <div className="flex items-center gap-1 text-xs mr-2">
+                 <MessageCircle className="w-3 h-3" /> {item.comments?.length || 0}
+               </div>
+
                <button 
                  onClick={handleBookmark}
                  className="p-1 hover:text-royal-600 transition-colors"

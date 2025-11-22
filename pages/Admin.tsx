@@ -144,6 +144,8 @@ const Admin: React.FC = () => {
       imageUrl: imageUrl || `https://picsum.photos/800/400?random=${Date.now()}`,
       readTime: `${Math.ceil(content.split(' ').length / 200)} min`,
       views: 0,
+      likes: 0,
+      comments: [],
       isSponsored: isSponsored,
       affiliate: affiliateLink ? { link: affiliateLink, text: affiliateText || 'Buy Now' } : undefined
     };
@@ -195,7 +197,9 @@ const Admin: React.FC = () => {
             createdAt: Date.now(),
             imageUrl: aiImage,
             readTime: '3 min',
-            views: 100
+            views: 100,
+            likes: 0,
+            comments: []
           };
           
           saveNewsItem(newItem);
