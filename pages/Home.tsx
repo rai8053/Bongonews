@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { CATEGORIES } from '../constants';
 import { getNews } from '../services/storageService';
 import { NewsItem, Category } from '../types';
 import NewsCard from '../components/NewsCard';
 import AdBanner from '../components/AdBanner';
-import { MapPin, RefreshCw, Navigation, Flame } from 'lucide-react';
+import { MapPin, RefreshCw, Navigation, Flame, Server } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -18,18 +19,17 @@ const Home: React.FC = () => {
     document.title = "BongoNews - Home"; // Reset Title
     loadNews();
     
-    // Simulate pulling fresh data every 5 minutes
+    // Pull fresh data every 60 seconds from VPS
     const intervalId = setInterval(() => {
       loadNews();
       setLastUpdated(new Date());
-    }, 300000); // 5 mins
+    }, 60000); 
 
     return () => clearInterval(intervalId);
   }, []);
 
-  const loadNews = () => {
-    const allNews = getNews();
-    // Default Sort by Date
+  const loadNews = async () => {
+    const allNews = await getNews();
     setNews(allNews.sort((a, b) => b.createdAt - a.createdAt));
   };
 

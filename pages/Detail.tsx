@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getNews, getNewsById, incrementView, addComment, toggleLikeNews, isNewsLikedByUser } from '../services/storageService';
@@ -36,12 +37,13 @@ const Detail: React.FC = () => {
         document.title = `${item.headline} | BongoNews`;
         
         // 3. Fetch Related
-        const allNews = getNews();
-        const related = allNews
-          .filter(n => n.category === item.category && n.id !== item.id)
-          .sort(() => 0.5 - Math.random()) 
-          .slice(0, 3);
-        setRelatedNews(related);
+        getNews().then((allNews) => {
+          const related = allNews
+            .filter(n => n.category === item.category && n.id !== item.id)
+            .sort(() => 0.5 - Math.random()) 
+            .slice(0, 3);
+          setRelatedNews(related);
+        });
       }
     }
     return () => {

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getNews } from '../services/storageService';
@@ -11,15 +12,18 @@ const SearchPage: React.FC = () => {
   const [results, setResults] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    if (query) {
-      const allNews = getNews();
-      const filtered = allNews.filter(item => 
-        item.headline.toLowerCase().includes(query.toLowerCase()) || 
-        item.content.toLowerCase().includes(query.toLowerCase()) ||
-        item.location?.toLowerCase().includes(query.toLowerCase())
-      );
-      setResults(filtered);
-    }
+    const fetchSearchResults = async () => {
+      if (query) {
+        const allNews = await getNews();
+        const filtered = allNews.filter(item => 
+          item.headline.toLowerCase().includes(query.toLowerCase()) || 
+          item.content.toLowerCase().includes(query.toLowerCase()) ||
+          item.location?.toLowerCase().includes(query.toLowerCase())
+        );
+        setResults(filtered);
+      }
+    };
+    fetchSearchResults();
   }, [query]);
 
   return (

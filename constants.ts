@@ -1,9 +1,12 @@
+
 import { Category, NewsItem } from './types';
 
 export const APP_NAME = "BongoNews";
 
-export const VPS_ENDPOINT = "https://api.example.com/transcribe";
-export const DEFAULT_VPS_KEY = "demo-key";
+// REPLACE THIS WITH YOUR VPS IP
+export const VPS_API_URL = "http://154.12.117.25:8000"; 
+export const VPS_ENDPOINT = VPS_API_URL;
+export const DEFAULT_VPS_KEY = "default_key";
 
 // Categories for the Tabs
 export const CATEGORIES = [
@@ -18,6 +21,7 @@ export const CATEGORIES = [
 const getAiImage = (prompt: string) => 
   `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&nologo=true`;
 
+// Kept as fallback if server is offline
 export const INITIAL_NEWS: NewsItem[] = [
   {
     id: '1',
