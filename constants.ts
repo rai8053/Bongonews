@@ -13,6 +13,10 @@ export const CATEGORIES = [
   Category.STATE,
 ];
 
+// Helper to generate consistent AI images
+const getAiImage = (prompt: string) => 
+  `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&nologo=true`;
+
 export const INITIAL_NEWS: NewsItem[] = [
   {
     id: '1',
@@ -21,7 +25,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'দীর্ঘ প্রতীক্ষার পর অবশেষে নিউ টাউন বাসীদের জন্য সুখবর। আজ সকালে মাননীয়া মুখ্যমন্ত্রী নতুন মেট্রো স্টেশনের উদ্বোধন করলেন।',
     category: Category.KOLKATA,
     location: 'New Town',
-    imageUrl: 'https://picsum.photos/800/400?random=1',
+    imageUrl: getAiImage('Kolkata Metro Station Inauguration crowd ribbon cutting photorealistic'),
     createdAt: Date.now() - 120000, // 2 mins ago
     readTime: '3 min',
     views: 1205
@@ -33,7 +37,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'মুর্শিদাবাদের হাজারদুয়ারি প্যালেসে এই বছর রেকর্ড সংখ্যক পর্যটক এসেছেন। স্থানীয় ব্যবসায়ীদের মুখে হাসি ফুটেছে।',
     category: Category.DISTRICT,
     location: 'Murshidabad',
-    imageUrl: 'https://picsum.photos/800/400?random=2',
+    imageUrl: getAiImage('Hazarduari Palace Murshidabad historic india building sunny day tourists'),
     createdAt: Date.now() - 300000, // 5 mins ago
     readTime: '4 min',
     views: 850
@@ -45,7 +49,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'উত্তরবঙ্গের পাহাড়ি এলাকাগুলিতে তাপমাত্রার পারদ নামছে। সান্দাকফুতে হালকা তুষারপাতের খবর পাওয়া গেছে।',
     category: Category.DISTRICT,
     location: 'Darjeeling',
-    imageUrl: 'https://picsum.photos/800/400?random=3',
+    imageUrl: getAiImage('Darjeeling tea garden snow mountain kanchenjunga view'),
     createdAt: Date.now() - 600000, // 10 mins ago
     readTime: '2 min',
     views: 3400
@@ -57,7 +61,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'রাজ্য সরকারের উদ্যোগে আবারও শুরু হচ্ছে দুয়ারে সরকার কর্মসূচি। লক্ষ্মীর ভাণ্ডার সহ একাধিক প্রকল্পের সুবিধা পাওয়া যাবে।',
     category: Category.STATE,
     location: 'West Bengal',
-    imageUrl: 'https://picsum.photos/800/400?random=4',
+    imageUrl: getAiImage('West Bengal government official camp village crowd india'),
     createdAt: Date.now() - 900000, // 15 mins ago
     readTime: '5 min',
     views: 920
@@ -69,7 +73,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'গরমের দাবদাহ থেকে কিছুটা স্বস্তি মিলতে পারে আজ বিকেলেই। আলিপুর আবহাওয়া দপ্তর জানিয়েছে।',
     category: Category.KOLKATA,
     location: 'Kolkata',
-    imageUrl: 'https://picsum.photos/800/400?random=5',
+    imageUrl: getAiImage('Kolkata city street rain storm dark clouds victoria memorial'),
     createdAt: Date.now() - 1200000, // 20 mins ago
     readTime: '2 min',
     views: 1500
@@ -81,7 +85,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'সেন ব্রাদার্স মিষ্টান্ন ভাণ্ডার উত্তর কলকাতার একটি ঐতিহ্যবাহী দোকান। এবারের পুজোয় তারা নিয়ে এসেছে অভিনব চকোলেট সন্দেশ এবং ম্যাঙ্গো দই।',
     category: Category.KOLKATA,
     location: 'Kolkata',
-    imageUrl: 'https://picsum.photos/800/400?random=6',
+    imageUrl: getAiImage('Bengali sweets shop display rosogolla sandesh'),
     createdAt: Date.now() - 1500000, 
     readTime: '1 min',
     views: 5000,
@@ -94,7 +98,7 @@ export const INITIAL_NEWS: NewsItem[] = [
     content: 'গরমের তীব্রতা বাড়ার সাথে সাথে এসির চাহিদাও বাড়ছে। আজকের প্রতিবেদনে আমরা আলোচনা করব ভোল্টাস এবং এলজি-র নতুন মডেলগুলি নিয়ে যা বিদ্যুৎ সাশ্রয়ী এবং দ্রুত ঠান্ডা করে।',
     category: Category.STATE,
     location: 'West Bengal',
-    imageUrl: 'https://picsum.photos/800/400?random=7',
+    imageUrl: getAiImage('Modern living room air conditioner wall cool blue light'),
     createdAt: Date.now() - 1800000,
     readTime: '5 min',
     views: 2300,

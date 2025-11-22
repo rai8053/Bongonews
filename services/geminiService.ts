@@ -15,10 +15,10 @@ export const generateHeadline = async (text: string): Promise<string> => {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `You are a senior editor for a Bengali news portal. 
-      Read the following transcribed text and generate a catchy, professional, and short newspaper-style headline in Bengali.
+      Read the following text and generate a catchy, professional, and short newspaper-style headline in Bengali.
       Only return the headline text, nothing else.
       
-      Text: ${text.substring(0, 2000)}...`, // Truncate to avoid token limits if huge
+      Text: ${text.substring(0, 2000)}...`,
     });
     return response.text?.trim() || "Headline Generation Failed";
   } catch (error) {
@@ -42,7 +42,7 @@ export const cleanNewsText = async (text: string): Promise<string> => {
     return response.text?.trim() || text;
   } catch (error) {
     console.error("Gemini Cleaning Error:", error);
-    return text; // Fallback to original
+    return text;
   }
 };
 
@@ -51,24 +51,22 @@ export const draftNewsFromTopic = async (topic: string): Promise<{ content: stri
     const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Search for the latest news and details regarding: "${topic}". 
-      Prioritize recent events in West Bengal or India if applicable.
+      contents: `Search for the latest news regarding: "${topic}". 
+      Prioritize recent events in West Bengal or India.
       Based on the search results, write a comprehensive news report in Bengali.
       The tone should be professional and journalistic.
-      Do not use Markdown formatting (bold/italic), just plain text paragraphs.`,
+      Do not use Markdown formatting.`,
       config: {
         tools: [{ googleSearch: {} }],
       },
     });
 
-    // Extract grounding metadata (Search Sources)
-    // @ts-ignore - groundingMetadata types might vary based on SDK version, accessing safely
+    // @ts-ignore 
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
     const sources = chunks
       .map((chunk: any) => chunk.web?.uri)
       .filter((uri: string) => uri) as string[];
     
-    // Deduplicate sources
     const uniqueSources = [...new Set(sources)];
 
     return {
@@ -78,5 +76,44 @@ export const draftNewsFromTopic = async (topic: string): Promise<{ content: stri
   } catch (error) {
     console.error("Research Error:", error);
     throw error;
+  }
+};
+
+export const generateImagePrompt = async (text: string): Promise<string> => {
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Read this Bengali news snippet and generate a short, visual English description (prompt) to generate a relevant image. 
+      Focus on the visual scene (e.g., "Kolkata street crowd raining", "Mamata Banerjee speech podium", "Traffic jam Howrah bridge").
+      Keep it under 10 words. Return ONLY the English prompt.
+      
+      News: ${text.substring(0, 500)}`,
+    });
+    return response.text?.trim() || "News West Bengal India generic";
+  } catch (error) {
+    console.error("Image Prompt Error:", error);
+    return "News West Bengal India generic";
+  }
+};
+
+export const getTrendingTopics = async (): Promise<string[]> => {
+  try {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Find 3 currently trending specific news topics in West Bengal or Kolkata. 
+      Return them as a simple comma-separated list of English phrases. 
+      Example: Metro disruption, Hilsa price rise, Durga Puja prep`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+    
+    const text = response.text || "";
+    return text.split(',').map(t => t.trim()).filter(t => t.length > 0);
+  } catch (error) {
+    console.error("Trending Topics Error:", error);
+    return ["Kolkata Weather", "West Bengal Politics", "Indian Cricket Team"];
   }
 };

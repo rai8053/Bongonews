@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { generateHeadline, cleanNewsText, draftNewsFromTopic } from '../services/geminiService';
+import React, { useState, useEffect } from 'react';
+import { generateHeadline, cleanNewsText, draftNewsFromTopic, generateImagePrompt, getTrendingTopics } from '../services/geminiService';
 import { saveNewsItem } from '../services/storageService';
 import { CATEGORIES } from '../constants';
 import { NewsItem, Category } from '../types';
-import { Wand2, Loader2, Save, Lock, PenTool, Sparkles, Globe, Search, MapPin, DollarSign, ShoppingBag } from 'lucide-react';
+import { Wand2, Loader2, Save, Lock, PenTool, Sparkles, Globe, Search, MapPin, DollarSign, Bot, Play, Square } from 'lucide-react';
 
 const Admin: React.FC = () => {
   // Auth State
@@ -18,11 +18,14 @@ const Admin: React.FC = () => {
   const [topic, setTopic] = useState('');
   const [sources, setSources] = useState<string[]>([]);
   
+  // Auto Pilot State
+  const [isAutoPilotOn, setIsAutoPilotOn] = useState(false);
+  
   // Form Data
   const [headline, setHeadline] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<string>(Category.BREAKING);
-  const [location, setLocation] = useState(''); // New field
+  const [location, setLocation] = useState(''); 
   const [previewText, setPreviewText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   
@@ -33,7 +36,6 @@ const Admin: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple hardcoded password for demo
     if (password === 'admin123') {
       setIsAuthenticated(true);
     } else {
@@ -41,7 +43,8 @@ const Admin: React.FC = () => {
     }
   };
 
-  // AI Helper: Research & Draft
+  // --- AI HELPERS ---
+
   const handleResearch = async () => {
     if (!topic) return;
     setLoading(true);
@@ -52,16 +55,21 @@ const Admin: React.FC = () => {
       setSources(result.sources);
       setStatus('Draft Created!');
       
-      // Auto generate headline after content is ready
+      // Auto generate headline
       const aiHeadline = await generateHeadline(result.content);
       setHeadline(aiHeadline);
       
-      // Auto preview
+      // Auto generate Image
+      const imgPrompt = await generateImagePrompt(result.content);
+      const aiImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=800&height=600&nologo=true`;
+      setImageUrl(aiImage);
+      
       setPreviewText(result.content.substring(0, 100) + "...");
       
-      // Guess location based on text (simple check)
+      // Guess location
       if (result.content.includes('কলকাতা')) setLocation('Kolkata');
-      if (result.content.includes('জেলা')) setLocation('District');
+      else if (result.content.includes('জেলা')) setLocation('District');
+      else setLocation('West Bengal');
       
     } catch (error) {
       console.error(error);
@@ -72,7 +80,6 @@ const Admin: React.FC = () => {
     }
   };
 
-  // AI Helper: Clean Text
   const handleCleanText = async () => {
     if (!content) return;
     setLoading(true);
@@ -82,36 +89,42 @@ const Admin: React.FC = () => {
       setContent(cleanText);
       setStatus('Text Cleaned!');
     } catch (error) {
-      console.error(error);
       setStatus('Error cleaning text.');
     } finally {
       setLoading(false);
-      setTimeout(() => setStatus(''), 2000);
     }
   };
 
-  // AI Helper: Generate Headline
   const handleGenerateHeadline = async () => {
     if (!content) return;
     setLoading(true);
-    setStatus('Generating Headline with AI...');
+    setStatus('Generating Headline...');
     try {
       const aiHeadline = await generateHeadline(content);
       setHeadline(aiHeadline);
-      setStatus('Headline Generated!');
     } catch (error) {
-      console.error(error);
       setStatus('Error generating headline.');
     } finally {
       setLoading(false);
-      setTimeout(() => setStatus(''), 2000);
     }
   };
 
-  // Helper: Auto Generate Preview
-  const handleGeneratePreview = () => {
-    if (!content) return;
-    setPreviewText(content.substring(0, 100) + "...");
+  const handleGenerateImage = async () => {
+    const baseText = headline || content || topic;
+    if (!baseText) return;
+    
+    setLoading(true);
+    setStatus('Creating AI Image...');
+    try {
+      const prompt = await generateImagePrompt(baseText);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&nologo=true`;
+      setImageUrl(url);
+      setStatus('Image Created!');
+    } catch (error) {
+      setStatus('Image failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePublish = () => {
@@ -138,7 +151,6 @@ const Admin: React.FC = () => {
     saveNewsItem(newItem);
     alert('News Published Successfully!');
     
-    // Reset
     setHeadline('');
     setContent('');
     setPreviewText('');
@@ -152,7 +164,57 @@ const Admin: React.FC = () => {
     setAffiliateText('');
   };
 
-  // --- LOGIN SCREEN ---
+  // --- AUTO PILOT LOOP ---
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isAutoPilotOn) {
+      const runAutoPilot = async () => {
+        setStatus('🤖 Auto-Pilot: Finding Trends...');
+        try {
+          // 1. Find a trend
+          const trends = await getTrendingTopics();
+          const randomTrend = trends[Math.floor(Math.random() * trends.length)];
+          
+          setStatus(`🤖 Auto-Pilot: Researching "${randomTrend}"...`);
+          
+          // 2. Draft News
+          const draft = await draftNewsFromTopic(randomTrend);
+          const aiHeadline = await generateHeadline(draft.content);
+          const imgPrompt = await generateImagePrompt(draft.content);
+          const aiImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=800&height=600&nologo=true`;
+          
+          // 3. Publish
+          const newItem: NewsItem = {
+            id: Date.now().toString(),
+            headline: aiHeadline,
+            content: draft.content,
+            previewText: draft.content.substring(0, 120) + "...",
+            category: Category.BREAKING,
+            location: 'West Bengal',
+            createdAt: Date.now(),
+            imageUrl: aiImage,
+            readTime: '3 min',
+            views: 100
+          };
+          
+          saveNewsItem(newItem);
+          setStatus(`✅ Auto-Published: ${randomTrend}`);
+          
+        } catch (e) {
+          console.error(e);
+          setStatus('⚠️ Auto-Pilot Error. Retrying...');
+        }
+      };
+
+      // Run immediately then every 30 seconds
+      runAutoPilot();
+      interval = setInterval(runAutoPilot, 30000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isAutoPilotOn]);
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-royal-900">
@@ -178,10 +240,7 @@ const Admin: React.FC = () => {
                 placeholder="••••••••"
               />
             </div>
-            <button 
-              type="submit"
-              className="w-full py-3 bg-royal-600 hover:bg-royal-700 text-white font-bold rounded-lg shadow-lg transition-transform transform active:scale-95"
-            >
+            <button type="submit" className="w-full py-3 bg-royal-600 text-white font-bold rounded-lg">
               লগইন করুন
             </button>
           </form>
@@ -190,7 +249,6 @@ const Admin: React.FC = () => {
     );
   }
 
-  // --- ADMIN DASHBOARD ---
   return (
     <div className="max-w-4xl mx-auto p-6 pb-24">
       <div className="flex items-center justify-between mb-8">
@@ -205,23 +263,44 @@ const Admin: React.FC = () => {
         </div>
         {status && (
           <div className="bg-bengal-100 text-bengal-800 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 animate-pulse">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {loading || isAutoPilotOn ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             {status}
           </div>
         )}
       </div>
 
-      {/* AI Research Section */}
-      <div className="bg-gradient-to-br from-royal-50 to-purple-50 dark:from-royal-800/50 dark:to-purple-900/30 p-6 rounded-xl border border-royal-100 dark:border-royal-700 mb-8">
+      {/* Auto Pilot Section */}
+      <div className="mb-8 p-6 bg-royal-900 text-white rounded-xl flex items-center justify-between shadow-lg relative overflow-hidden">
+         <div className="relative z-10">
+            <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
+              <Bot className="w-6 h-6 text-bengal-500" /> Auto-Pilot News Bot
+            </h3>
+            <p className="text-sm text-slate-300 max-w-md">
+              Automatically searches trends, writes articles, creates images, and publishes news every 30s.
+            </p>
+         </div>
+         <div className="relative z-10">
+            <button 
+              onClick={() => setIsAutoPilotOn(!isAutoPilotOn)}
+              className={`px-6 py-3 rounded-full font-bold flex items-center gap-2 transition-all ${isAutoPilotOn ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+            >
+               {isAutoPilotOn ? <><Square className="w-4 h-4 fill-current" /> Stop Bot</> : <><Play className="w-4 h-4 fill-current" /> Start Bot</>}
+            </button>
+         </div>
+         <div className="absolute right-0 top-0 w-64 h-64 bg-royal-600/20 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Manual Research Section */}
+      <div className="bg-slate-50 dark:bg-royal-800/50 p-6 rounded-xl border border-slate-200 dark:border-royal-700 mb-8">
         <div className="flex items-center gap-2 mb-3 text-royal-700 dark:text-bengal-400 font-bold">
           <Globe className="w-5 h-5" />
-          <h3>Smart Research & Auto-Draft</h3>
+          <h3>Smart Research</h3>
         </div>
         <div className="flex gap-2">
           <input 
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter topic (e.g., 'Kolkata Metro Update' or 'IPL News')..."
+            placeholder="Enter topic (e.g., 'Kolkata Weather')..."
             className="flex-1 p-3 rounded-lg border border-slate-300 dark:border-royal-600 bg-white dark:bg-royal-900 focus:outline-none focus:ring-2 focus:ring-royal-500"
           />
           <button 
@@ -233,157 +312,100 @@ const Admin: React.FC = () => {
             Auto-Draft
           </button>
         </div>
-        <p className="text-xs text-slate-500 mt-2">
-          Uses Gemini Search Grounding to find real facts and write a Bengali article.
-        </p>
-        
-        {/* Sources Display */}
-        {sources.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-royal-200 dark:border-royal-700">
-             <p className="text-xs font-bold text-slate-500 mb-2">Sources Found:</p>
-             <div className="flex flex-wrap gap-2">
-               {sources.map((src, i) => (
-                 <a 
-                    key={i} 
-                    href={src} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[10px] bg-white dark:bg-royal-900 px-2 py-1 rounded border border-slate-200 dark:border-royal-700 text-royal-600 dark:text-royal-300 hover:underline truncate max-w-[200px]"
-                 >
-                   {new URL(src).hostname}
-                 </a>
-               ))}
-             </div>
-          </div>
-        )}
       </div>
 
+      {/* Editor */}
       <div className="bg-white dark:bg-royal-800 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-royal-700 space-y-6">
-        
-        {/* Headline Section */}
         <div>
           <div className="flex justify-between items-end mb-2">
-            <label className="block text-sm font-bold dark:text-slate-200">Headline (Bangla)</label>
+            <label className="block text-sm font-bold dark:text-slate-200">Headline</label>
             <button 
               onClick={handleGenerateHeadline}
               disabled={!content || loading}
-              className="text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 px-3 py-1 rounded-full flex items-center gap-1 transition disabled:opacity-50"
+              className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full flex items-center gap-1"
             >
-              <Wand2 className="w-3 h-3" /> Generate with AI
+              <Wand2 className="w-3 h-3" /> AI Headline
             </button>
           </div>
           <input 
             value={headline}
             onChange={(e) => setHeadline(e.target.value)}
             className="w-full p-4 text-xl font-serif font-bold bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg focus:ring-2 focus:ring-royal-500 outline-none"
-            placeholder="লিখুন অথবা AI ব্যবহার করুন..."
           />
         </div>
 
-        {/* Content Section */}
         <div>
            <div className="flex justify-between items-end mb-2">
-            <label className="block text-sm font-bold dark:text-slate-200">Full Article Content</label>
+            <label className="block text-sm font-bold dark:text-slate-200">Content</label>
             <button 
               onClick={handleCleanText}
               disabled={!content || loading}
-              className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-full flex items-center gap-1 transition disabled:opacity-50"
+              className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full flex items-center gap-1"
             >
-              <Sparkles className="w-3 h-3" /> Polish / Clean Text
+              <Sparkles className="w-3 h-3" /> Clean Text
             </button>
           </div>
           <textarea 
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            onBlur={handleGeneratePreview}
-            className="w-full p-4 min-h-[300px] font-serif bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg focus:ring-2 focus:ring-royal-500 outline-none leading-loose text-lg"
-            placeholder="Paste or type your news article here..."
+            className="w-full p-4 min-h-[300px] font-serif bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg focus:ring-2 focus:ring-royal-500 outline-none text-lg"
           />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Left Column */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-bold mb-2 dark:text-slate-200">Category</label>
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none focus:ring-2 focus:ring-royal-500"
+                className="w-full p-3 bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none"
               >
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2 dark:text-slate-200">Specific Location</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <label className="block text-sm font-bold mb-2 dark:text-slate-200">Image URL</label>
+              <div className="flex gap-2">
                 <input 
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full pl-10 p-3 bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none focus:ring-2 focus:ring-royal-500 text-sm"
-                  placeholder="Enter city or area name..."
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="flex-1 p-3 bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none text-sm"
+                  placeholder="https://..."
                 />
+                <button 
+                   onClick={handleGenerateImage}
+                   className="p-3 bg-bengal-500 text-royal-900 rounded-lg hover:bg-bengal-400 transition"
+                   title="Generate AI Image"
+                >
+                  <Wand2 className="w-5 h-5" />
+                </button>
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2 dark:text-slate-200">Image URL (Optional)</label>
-              <input 
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none focus:ring-2 focus:ring-royal-500 text-sm"
-                placeholder="https://..."
-              />
-            </div>
           </div>
-
-          {/* Right Column: Preview & Monetization */}
+          
           <div className="space-y-4">
-             <div>
-                <label className="block text-sm font-bold mb-2 dark:text-slate-200">Short Preview</label>
-                <textarea 
-                    value={previewText}
-                    onChange={(e) => setPreviewText(e.target.value)}
-                    className="w-full p-3 h-[130px] bg-slate-50 dark:bg-royal-900 border border-slate-200 dark:border-royal-700 rounded-lg outline-none focus:ring-2 focus:ring-royal-500 resize-none"
-                    placeholder="Auto-generated from content..."
-                />
-             </div>
-
-             {/* MONETIZATION SECTION */}
+             {/* Preview & Monetization (Same as before) */}
              <div className="p-4 bg-slate-50 dark:bg-royal-900/50 border border-slate-200 dark:border-royal-700 rounded-lg">
                 <h4 className="text-sm font-bold text-royal-700 dark:text-bengal-500 mb-3 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" /> Monetization Tools
+                  <DollarSign className="w-4 h-4" /> Monetization
                 </h4>
-                
-                {/* Sponsored Toggle */}
                 <label className="flex items-center gap-3 mb-4 cursor-pointer">
                     <input 
                       type="checkbox"
                       checked={isSponsored}
                       onChange={(e) => setIsSponsored(e.target.checked)}
-                      className="w-4 h-4 text-royal-600 focus:ring-royal-500 rounded"
+                      className="w-4 h-4 rounded"
                     />
-                    <span className="text-sm font-medium dark:text-slate-300">Sponsored Post (Native Ad)</span>
+                    <span className="text-sm font-medium dark:text-slate-300">Sponsored Post</span>
                 </label>
-
-                {/* Affiliate Links */}
-                <div className="space-y-2">
-                   <label className="text-xs font-bold text-slate-500 uppercase">Affiliate Marketing (Product Link)</label>
-                   <input 
-                      value={affiliateLink}
-                      onChange={(e) => setAffiliateLink(e.target.value)}
-                      placeholder="https://amazon.in/..."
-                      className="w-full p-2 text-xs rounded border border-slate-300 dark:border-royal-600 dark:bg-royal-800 dark:text-white"
-                   />
-                   <input 
-                      value={affiliateText}
-                      onChange={(e) => setAffiliateText(e.target.value)}
-                      placeholder="Button Text (e.g. Check Price on Amazon)"
-                      className="w-full p-2 text-xs rounded border border-slate-300 dark:border-royal-600 dark:bg-royal-800 dark:text-white"
-                   />
-                </div>
+                <input 
+                   value={affiliateLink}
+                   onChange={(e) => setAffiliateLink(e.target.value)}
+                   placeholder="Affiliate Link"
+                   className="w-full p-2 text-xs rounded border border-slate-300 dark:border-royal-600 dark:bg-royal-800 mb-2"
+                />
              </div>
           </div>
         </div>
@@ -391,10 +413,10 @@ const Admin: React.FC = () => {
         <div className="pt-4 border-t border-slate-100 dark:border-royal-700 flex justify-end">
           <button
             onClick={handlePublish}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-green-600/30 flex items-center gap-2 transition-transform transform hover:scale-105 active:scale-95"
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center gap-2"
           >
             <Save className="w-5 h-5" />
-            Publish Article
+            Publish
           </button>
         </div>
       </div>

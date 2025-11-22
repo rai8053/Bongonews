@@ -11,10 +11,17 @@ interface NewsCardProps {
 
 const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
   const [saved, setSaved] = useState(false);
+  const [imgSrc, setImgSrc] = useState(item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`);
 
   useEffect(() => {
     setSaved(isBookmarked(item.id));
-  }, [item.id]);
+    setImgSrc(item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`);
+  }, [item.id, item.imageUrl]);
+
+  const handleImageError = () => {
+    // Fallback if AI image fails
+    setImgSrc(`https://picsum.photos/seed/${item.id}/800/400`);
+  };
 
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,7 +53,6 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     return new Intl.DateTimeFormat('bn-BD', { hour: 'numeric', minute: 'numeric' }).format(date);
   };
 
-  // Sponsored Post (Native Ad) Design
   if (item.isSponsored) {
     return (
       <Link to={`/news/${item.id}`} className="block mb-4">
@@ -57,7 +63,8 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
           
           <div className="w-1/3 aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 relative border border-bengal-200">
             <img 
-              src={item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`} 
+              src={imgSrc} 
+              onError={handleImageError}
               alt={item.headline} 
               className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
             />
@@ -87,7 +94,8 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
       <Link to={`/news/${item.id}`} className="block group">
         <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 aspect-video w-full">
           <img 
-            src={item.imageUrl || 'https://picsum.photos/800/450'} 
+            src={imgSrc} 
+            onError={handleImageError}
             alt={item.headline} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
@@ -120,7 +128,8 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, featured = false }) => {
     <Link to={`/news/${item.id}`} className="flex gap-4 p-4 bg-white dark:bg-royal-800/50 rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-royal-800 transition-all duration-300 border border-slate-100 dark:border-royal-700/50 relative">
       <div className="w-1/3 aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0 relative">
         <img 
-          src={item.imageUrl || `https://picsum.photos/seed/${item.id}/400/300`} 
+          src={imgSrc} 
+          onError={handleImageError}
           alt={item.headline} 
           className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
         />
