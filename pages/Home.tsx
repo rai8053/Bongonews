@@ -14,18 +14,10 @@ const Home: React.FC = () => {
   const [locationLoading, setLocationLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Load news and set up auto-refresh simulation
+  // Load news
   useEffect(() => {
     document.title = "BongoNews - Home"; // Reset Title
     loadNews();
-    
-    // Pull fresh data every 60 seconds from VPS
-    const intervalId = setInterval(() => {
-      loadNews();
-      setLastUpdated(new Date());
-    }, 60000); 
-
-    return () => clearInterval(intervalId);
   }, []);
 
   const loadNews = async () => {

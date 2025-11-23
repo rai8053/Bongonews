@@ -3,10 +3,9 @@ import { Category, NewsItem } from './types';
 
 export const APP_NAME = "BongoNews";
 
-// REPLACE THIS WITH YOUR VPS IP
-export const VPS_API_URL = "http://154.12.117.25:8000"; 
-export const VPS_ENDPOINT = VPS_API_URL;
-export const DEFAULT_VPS_KEY = "default_key";
+// VPS Configuration
+export const VPS_ENDPOINT = "https://api.example.com/transcribe"; // Replace with actual VPS endpoint
+export const DEFAULT_VPS_KEY = "";
 
 // Categories for the Tabs
 export const CATEGORIES = [

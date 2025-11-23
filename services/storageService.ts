@@ -1,38 +1,13 @@
 
 import { NewsItem, Comment } from '../types';
-import { INITIAL_NEWS, VPS_API_URL } from '../constants';
+import { INITIAL_NEWS } from '../constants';
 
 const STORAGE_KEY = 'bongo_news_db';
 const BOOKMARK_KEY = 'bongo_news_bookmarks';
 const LIKED_KEY = 'bongo_news_likes'; 
 
 export const getNews = async (): Promise<NewsItem[]> => {
-  // 1. Try Fetching from VPS
-  // Increased timeout to 2000ms (2 seconds) to be more reliable on initial load
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); 
-
-    const response = await fetch(`${VPS_API_URL}/news`, { 
-      signal: controller.signal 
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data && Array.isArray(data) && data.length > 0) {
-        // Sync local storage as backup
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        return data;
-      }
-    }
-  } catch (e) {
-    // Silently fail if VPS is down/refused and use fallback
-    // console.warn("VPS Unavailable, switching to Local Mode");
-  }
-
-  // 2. Fallback to Local Storage
+  // Fallback to Local Storage
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
     // Initialize with Mock Data if first time
@@ -49,18 +24,7 @@ export const getNewsSync = (): NewsItem[] => {
 }
 
 export const saveNewsItem = async (item: NewsItem): Promise<void> => {
-  // 1. Try saving to VPS
-  try {
-    await fetch(`${VPS_API_URL}/news`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    });
-  } catch (e) {
-    console.warn("Could not save to VPS, saving locally");
-  }
-
-  // 2. Save Locally
+  // Save Locally
   const current = getNewsSync();
   // Ensure new items have default counts
   if (!item.views) item.views = 0;

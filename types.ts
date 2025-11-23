@@ -1,3 +1,4 @@
+
 export interface Comment {
   id: string;
   user: string;
@@ -25,6 +26,16 @@ export interface NewsItem {
   };
 }
 
+export interface TranscribeResponse {
+  text: string;
+  segments?: Array<{
+    start: number;
+    end: number;
+    text: string;
+  }>;
+  language?: string;
+}
+
 export enum Category {
   ALL = 'All News',
   TRENDING = 'Trending', // New Dynamic Category
@@ -33,13 +44,4 @@ export enum Category {
   DISTRICT = 'Districts',
   STATE = 'West Bengal',
   BREAKING = 'Breaking',
-}
-
-export interface TranscribeResponse {
-  text: string;
-}
-
-export interface VpsConfig {
-  endpoint: string;
-  apiKey: string;
 }
