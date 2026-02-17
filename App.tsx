@@ -1,62 +1,37 @@
+
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
 import Detail from './pages/Detail';
 import Admin from './pages/Admin';
-import About from './pages/About';
-import SearchPage from './pages/Search';
-import Bookmarks from './pages/Bookmarks';
-
-// Scroll to top component
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-};
+import { CITIES } from './constants';
+import { Bot } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const [currentCity, setCurrentCity] = useState(CITIES[0].id);
 
   return (
     <Router>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col relative">
-        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <div className="min-h-screen flex flex-col bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+        <Header currentCity={currentCity} setCity={setCurrentCity} />
         
-        <main className="flex-1 w-full bg-slate-50 dark:bg-royal-900 transition-colors duration-300">
+        <main className="flex-1 w-full transition-colors duration-300">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home currentCity={currentCity} />} />
             <Route path="/news/:id" element={<Detail />} />
             <Route path="/admin" element={<Admin />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/bookmarks" element={<Bookmarks />} />
-            <Route path="*" element={<Home />} />
+            <Route path="*" element={<Home currentCity={currentCity} />} />
           </Routes>
         </main>
 
-        <BottomNav />
+        {/* Desktop Admin Link */}
+        <div className="fixed bottom-6 right-6 z-50">
+           <a href="#/admin" className="w-12 h-12 bg-slate-900 text-white rounded-2xl shadow-xl flex items-center justify-center hover:scale-110 transition group">
+              <span className="absolute right-full mr-3 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">ADMIN</span>
+              <Bot className="w-6 h-6" />
+           </a>
+        </div>
       </div>
     </Router>
   );

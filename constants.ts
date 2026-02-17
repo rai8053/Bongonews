@@ -1,133 +1,81 @@
 
-import { Category, NewsItem } from './types';
+import { CityConfig, NewsItem } from './types';
 
-export const APP_NAME = "BongoNews";
+export const APP_NAME = "LocalBeat";
 
-// VPS Configuration
-export const VPS_ENDPOINT = "https://api.example.com/transcribe"; // Replace with actual VPS endpoint
-export const DEFAULT_VPS_KEY = "";
-
-// Categories for the Tabs
-export const CATEGORIES = [
-  Category.TRENDING,
-  Category.BREAKING,
-  Category.KOLKATA,
-  Category.DISTRICT,
-  Category.STATE,
+export const CITIES: CityConfig[] = [
+  {
+    id: 'bengaluru',
+    name: 'Bengaluru',
+    neighborhoods: ['Koramangala', 'Indiranagar', 'HSR Layout', 'Whitefield'],
+    rssFeeds: ['TOI Bengaluru', 'Deccan Herald'],
+    eventSources: ['Eventbrite Bengaluru']
+  },
+  {
+    id: 'mumbai',
+    name: 'Mumbai',
+    neighborhoods: ['Bandra', 'Andheri', 'Colaba', 'Juhu'],
+    rssFeeds: ['Hindustan Times Mumbai'],
+    eventSources: ['BookMyShow Mumbai']
+  },
+  {
+    id: 'delhi',
+    name: 'Delhi',
+    neighborhoods: ['South Delhi', 'Connaught Place', 'Dwarka'],
+    rssFeeds: ['NDTV Delhi'],
+    eventSources: ['EventsHigh Delhi']
+  }
 ];
 
-// Helper to generate consistent AI images
 const getAiImage = (prompt: string) => 
-  `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&nologo=true`;
+  `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=450&nologo=true`;
 
-// Kept as fallback if server is offline
 export const INITIAL_NEWS: NewsItem[] = [
   {
-    id: '1',
-    headline: 'নিউ টাউনে নতুন মেট্রো স্টেশনের উদ্বোধন করলেন মুখ্যমন্ত্রী',
-    previewText: 'যাত্রীদের দীর্ঘদিনের অপেক্ষার অবসান ঘটিয়ে অবশেষে চালু হলো নতুন রুট...',
-    content: 'দীর্ঘ প্রতীক্ষার পর অবশেষে নিউ টাউন বাসীদের জন্য সুখবর। আজ সকালে মাননীয়া মুখ্যমন্ত্রী নতুন মেট্রো স্টেশনের উদ্বোধন করলেন।',
-    category: Category.KOLKATA,
-    location: 'New Town',
-    imageUrl: getAiImage('Kolkata Metro Station Inauguration crowd ribbon cutting photorealistic'),
-    createdAt: Date.now() - 120000, // 2 mins ago
-    readTime: '3 min',
-    views: 1205,
-    likes: 342,
-    comments: [
-      { id: 'c1', user: 'Raju Das', text: 'খুব ভালো খবর! অনেক সুবিধা হবে।', timestamp: Date.now() - 60000 },
-      { id: 'c2', user: 'Soma Dey', text: 'ভাড়া কত হবে?', timestamp: Date.now() - 30000 }
-    ]
-  },
-  {
-    id: '2',
-    headline: 'মুর্শিদাবাদে ঐতিহাসিক পর্যটন কেন্দ্রে পর্যটকদের ভিড়',
-    previewText: 'শীতের মরসুমে হাজার হাজার মানুষ ভিড় জমিয়েছেন হাজারদুয়ারিতে...',
-    content: 'মুর্শিদাবাদের হাজারদুয়ারি প্যালেসে এই বছর রেকর্ড সংখ্যক পর্যটক এসেছেন। স্থানীয় ব্যবসায়ীদের মুখে হাসি ফুটেছে।',
-    category: Category.DISTRICT,
-    location: 'Murshidabad',
-    imageUrl: getAiImage('Hazarduari Palace Murshidabad historic india building sunny day tourists'),
-    createdAt: Date.now() - 300000, // 5 mins ago
-    readTime: '4 min',
-    views: 850,
-    likes: 120,
-    comments: []
-  },
-  {
-    id: '3',
-    headline: 'দার্জিলিং-এ তুষারপাতের সম্ভাবনা, পর্যটকদের জন্য সুখবর',
-    previewText: 'আবহাওয়া দপ্তরের পূর্বাভাস অনুযায়ী আগামী কাল থেকেই নামতে পারে তাপমাত্রা...',
-    content: 'উত্তরবঙ্গের পাহাড়ি এলাকাগুলিতে তাপমাত্রার পারদ নামছে। সান্দাকফুতে হালকা তুষারপাতের খবর পাওয়া গেছে।',
-    category: Category.DISTRICT,
-    location: 'Darjeeling',
-    imageUrl: getAiImage('Darjeeling tea garden snow mountain kanchenjunga view'),
-    createdAt: Date.now() - 600000, // 10 mins ago
+    id: 'b1',
+    headline: 'New Metro Line connecting Silk Board to KR Puram opens Friday',
+    previewText: 'The long-awaited Outer Ring Road metro line is finally opening its doors to commuters...',
+    content: 'Commuters in Bengaluru have a reason to celebrate. The BMRCL confirmed that the ORR line is operational. This will reduce travel time by 40 minutes for techies working in HSR and Bellandur.',
+    type: 'STORY',
+    category: 'Top Stories',
+    city: 'bengaluru',
+    neighborhood: 'HSR Layout',
+    imageUrl: getAiImage('Modern Bangalore Metro train on elevated track blue sky'),
+    createdAt: Date.now(),
     readTime: '2 min',
-    views: 3400,
-    likes: 890,
-    comments: [
-      { id: 'c3', user: 'Travel Lover', text: 'যাব ভাবছি আগামী সপ্তাহে।', timestamp: Date.now() - 100000 }
-    ]
-  },
-  {
-    id: '4',
-    headline: 'রাজ্যজুড়ে শুরু হচ্ছে "দুয়ারে সরকার" ক্যাম্প',
-    previewText: 'আগামী ১লা তারিখ থেকে রাজ্যের প্রতিটি ব্লকে বসবে ক্যাম্প...',
-    content: 'রাজ্য সরকারের উদ্যোগে আবারও শুরু হচ্ছে দুয়ারে সরকার কর্মসূচি। লক্ষ্মীর ভাণ্ডার সহ একাধিক প্রকল্পের সুবিধা পাওয়া যাবে।',
-    category: Category.STATE,
-    location: 'West Bengal',
-    imageUrl: getAiImage('West Bengal government official camp village crowd india'),
-    createdAt: Date.now() - 900000, // 15 mins ago
-    readTime: '5 min',
-    views: 920,
+    views: 1500,
     likes: 45,
     comments: []
   },
   {
-    id: '5',
-    headline: 'কলকাতায় আজ বিকেলে কালবৈশাখীর পূর্বাভাস',
-    previewText: 'আলিপুর আবহাওয়া দপ্তরের সতর্কবার্তা, উপকূলবর্তী এলাকায় জলোচ্ছ্বাস...',
-    content: 'গরমের দাবদাহ থেকে কিছুটা স্বস্তি মিলতে পারে আজ বিকেলেই। আলিপুর আবহাওয়া দপ্তর জানিয়েছে।',
-    category: Category.KOLKATA,
-    location: 'Kolkata',
-    imageUrl: getAiImage('Kolkata city street rain storm dark clouds victoria memorial'),
-    createdAt: Date.now() - 1200000, // 20 mins ago
-    readTime: '2 min',
-    views: 1500,
-    likes: 210,
+    id: 'b2',
+    headline: 'Sunday Soul Sante: Fashion & Art Market',
+    previewText: 'Head to Jayamahal Palace this Sunday for the city\'s favorite flea market...',
+    content: 'Experience the best of local art, music, and food. Over 200 stalls featuring hand-crafted goods.',
+    type: 'EVENT',
+    category: 'Weekend Events',
+    city: 'bengaluru',
+    imageUrl: getAiImage('Outdoor flea market india colorful stalls people'),
+    createdAt: Date.now(),
+    externalLink: 'https://insider.in',
+    views: 800,
+    likes: 22,
     comments: []
   },
   {
-    id: '6',
-    headline: 'সেন ব্রাদার্স মিষ্টান্ন ভাণ্ডারে পুজো স্পেশাল ছাড়!',
-    previewText: 'এই পুজোয় মিষ্টি প্রেমীদের জন্য সুখবর। সেন ব্রাদার্স নিয়ে এলো নতুন স্বাদের সন্দেশ...',
-    content: 'সেন ব্রাদার্স মিষ্টান্ন ভাণ্ডার উত্তর কলকাতার একটি ঐতিহ্যবাহী দোকান। এবারের পুজোয় তারা নিয়ে এসেছে অভিনব চকোলেট সন্দেশ এবং ম্যাঙ্গো দই।',
-    category: Category.KOLKATA,
-    location: 'Kolkata',
-    imageUrl: getAiImage('Bengali sweets shop display rosogolla sandesh'),
-    createdAt: Date.now() - 1500000, 
-    readTime: '1 min',
-    views: 5000,
-    likes: 150,
-    comments: [],
-    isSponsored: true
-  },
-  {
-    id: '7',
-    headline: 'গরমের সেরা ৫টি এসি - দাম এবং ফিচার',
-    previewText: 'এই গরমে কোন এসি কিনবেন ভাবছেন? দেখে নিন আমাদের বাছাই করা সেরা ৫টি মডেলের তালিকা...',
-    content: 'গরমের তীব্রতা বাড়ার সাথে সাথে এসির চাহিদাও বাড়ছে। আজকের প্রতিবেদনে আমরা আলোচনা করব ভোল্টাস এবং এলজি-র নতুন মডেলগুলি নিয়ে যা বিদ্যুৎ সাশ্রয়ী এবং দ্রুত ঠান্ডা করে।',
-    category: Category.STATE,
-    location: 'West Bengal',
-    imageUrl: getAiImage('Modern living room air conditioner wall cool blue light'),
-    createdAt: Date.now() - 1800000,
-    readTime: '5 min',
-    views: 2300,
-    likes: 67,
-    comments: [],
-    affiliate: {
-      link: 'https://amazon.in',
-      text: 'Check Best Price on Amazon'
-    }
+    id: 'b3',
+    headline: '50% Off at Third Wave Coffee Koramangala',
+    previewText: 'Exclusive deal for LocalBeat subscribers this weekend only...',
+    content: 'Flash this newsletter at the Koramangala 4th Block outlet to avail 1+1 on all cold brews.',
+    type: 'DEAL',
+    category: 'Local Deals',
+    city: 'bengaluru',
+    neighborhood: 'Koramangala',
+    imageUrl: getAiImage('Aesthetic coffee shop interior latte art'),
+    createdAt: Date.now(),
+    isSponsored: true,
+    views: 3000,
+    likes: 120,
+    comments: []
   }
 ];

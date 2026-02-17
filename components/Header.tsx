@@ -1,95 +1,53 @@
-import React, { useState } from 'react';
-import { Menu, Search, Moon, Sun, X, Bell } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React from 'react';
+import { MapPin, Bell, User, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CITIES } from '../constants';
 
 interface HeaderProps {
-  darkMode: boolean;
-  toggleDarkMode: () => void;
+  currentCity: string;
+  setCity: (cityId: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode }) => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setIsSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
+const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
+  const city = CITIES.find(c => c.id === currentCity) || CITIES[0];
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-royal-900/90 border-b border-slate-200 dark:border-slate-700 transition-colors duration-300 shadow-sm">
-      <div className="max-w-screen-xl mx-auto px-4 h-16 flex items-center justify-between">
-        
-        {/* Left: Logo & Menu (Hidden if search is open on mobile) */}
-        {!isSearchOpen && (
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-slate-100 dark:hover:bg-royal-700 rounded-full transition-colors md:hidden">
-              <Menu className="w-6 h-6 text-royal-600 dark:text-slate-200" />
-            </button>
-            <Link to="/" className="flex items-center gap-2 group">
-               <div className="w-8 h-8 bg-gradient-to-br from-royal-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold font-serif text-xl shadow-lg group-hover:scale-105 transition-transform">
-                 ব
-               </div>
-               <span className="text-2xl font-bold font-serif bg-clip-text text-transparent bg-gradient-to-r from-royal-600 to-purple-600 dark:from-slate-100 dark:to-slate-300 hidden xs:block">
-                 বঙ্গ নিউজ
-               </span>
-            </Link>
+    <header className="sticky top-0 z-50 w-full bg-slate-900 text-white border-b border-slate-800 shadow-xl">
+      <div className="max-w-screen-md mx-auto px-4 h-16 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-indigo-500/20 shadow-lg group-hover:scale-105 transition-transform">
+            L
           </div>
-        )}
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-tighter leading-none">LOCALBEAT</span>
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Weekly Digest</span>
+          </div>
+        </Link>
 
-        {/* Center/Right: Search Bar */}
-        <div className={`flex-1 flex items-center justify-end ${isSearchOpen ? 'w-full' : ''}`}>
-          {isSearchOpen ? (
-            <form onSubmit={handleSearchSubmit} className="w-full flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-200">
-              <input 
-                autoFocus
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="খবর খুঁজুন (Search News)..."
-                className="w-full bg-slate-100 dark:bg-royal-800 border-none rounded-full py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-royal-500 outline-none"
-              />
-              <button type="submit" className="p-2 bg-royal-600 text-white rounded-full">
-                <Search className="w-4 h-4" />
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setIsSearchOpen(false)}
-                className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-royal-700 rounded-full"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </form>
-          ) : (
-            /* Right: Actions */
-            <div className="flex items-center gap-1 md:gap-3">
-              <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-royal-700 rounded-full text-slate-600 dark:text-slate-300 transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-              
-              <button 
-                className="p-2 hover:bg-slate-100 dark:hover:bg-royal-700 rounded-full text-slate-600 dark:text-slate-300 transition-colors relative"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-royal-900"></span>
-              </button>
-              
-              <button 
-                onClick={toggleDarkMode}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-royal-700 rounded-full text-slate-600 dark:text-slate-300 transition-colors"
-              >
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <button className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-slate-700 transition">
+              <MapPin className="w-3 h-3 text-indigo-400" />
+              {city.name}
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </button>
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2 z-50">
+              {CITIES.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setCity(c.id)}
+                  className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 ${currentCity === c.id ? 'text-indigo-600 bg-indigo-50' : ''}`}
+                >
+                  {c.name}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+          
+          <button className="p-2 text-slate-400 hover:text-white">
+            <Bell className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>

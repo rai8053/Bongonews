@@ -1,4 +1,6 @@
 
+export type ContentType = 'STORY' | 'EVENT' | 'DEAL' | 'WEATHER' | 'TRAFFIC';
+
 export interface Comment {
   id: string;
   user: string;
@@ -11,37 +13,36 @@ export interface NewsItem {
   headline: string;
   previewText: string;
   content: string;
-  category: string;
-  location?: string; // e.g., "Kolkata", "Siliguri", "Barasat"
+  type: ContentType;
+  city: string;
+  neighborhood?: string;
   imageUrl?: string;
   createdAt: number;
   readTime?: string;
   views: number;
   likes: number;
   comments: Comment[];
-  isSponsored?: boolean; // For monetization
+  isSponsored?: boolean;
+  externalLink?: string;
+  // Adding category and affiliate to fix "Property does not exist" errors
+  category?: string;
   affiliate?: {
     link: string;
-    text: string;
+    text?: string;
   };
 }
 
-export interface TranscribeResponse {
-  text: string;
-  segments?: Array<{
-    start: number;
-    end: number;
-    text: string;
-  }>;
-  language?: string;
+export interface CityConfig {
+  id: string;
+  name: string;
+  neighborhoods: string[];
+  rssFeeds: string[];
+  eventSources: string[];
 }
 
 export enum Category {
-  ALL = 'All News',
-  TRENDING = 'Trending', // New Dynamic Category
-  MY_AREA = 'My Area', 
-  KOLKATA = 'Kolkata',
-  DISTRICT = 'Districts',
-  STATE = 'West Bengal',
-  BREAKING = 'Breaking',
+  STORY = 'Top Stories',
+  EVENT = 'Weekend Events',
+  DEAL = 'Local Deals',
+  INFO = 'Weather & Traffic'
 }

@@ -18,7 +18,7 @@ const SearchPage: React.FC = () => {
         const filtered = allNews.filter(item => 
           item.headline.toLowerCase().includes(query.toLowerCase()) || 
           item.content.toLowerCase().includes(query.toLowerCase()) ||
-          item.location?.toLowerCase().includes(query.toLowerCase())
+          item.city?.toLowerCase().includes(query.toLowerCase())
         );
         setResults(filtered);
       }
