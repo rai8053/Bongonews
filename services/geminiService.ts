@@ -9,9 +9,10 @@ const getAI = () => {
 export const curateNewsletterSection = async (city: string, rawData: string, type: 'STORY' | 'EVENT' | 'DEAL'): Promise<any> => {
   const ai = getAI();
   const prompt = `
-    You are an AI editor for "LocalBeat", a hyper-local newsletter for ${city}.
-    Task: Convert the following raw text into a high-quality ${type} entry.
-    Raw Data: ${rawData}
+    You are a professional Bengali news editor for "Bongo News".
+    Task: Convert the following news topic into a high-quality news entry in Bengali.
+    Topic: ${rawData} for the city ${city}.
+    Requirement: Write in a professional journalistic tone. Use Hind Siliguri font style (pure Bengali).
   `;
 
   const response = await ai.models.generateContent({
@@ -22,9 +23,9 @@ export const curateNewsletterSection = async (city: string, rawData: string, typ
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          headline: { type: Type.STRING },
-          content: { type: Type.STRING },
-          previewText: { type: Type.STRING }
+          headline: { type: Type.STRING, description: "Catchy Bengali headline" },
+          content: { type: Type.STRING, description: "Detailed news body in Bengali" },
+          previewText: { type: Type.STRING, description: "1-sentence summary" }
         },
         required: ["headline", "content", "previewText"]
       }
@@ -34,21 +35,20 @@ export const curateNewsletterSection = async (city: string, rawData: string, typ
   return JSON.parse(response.text || "{}");
 };
 
-export const generateWeatherTraffic = async (city: string, neighborhood: string): Promise<string> => {
-  const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: `Write a 2-sentence update for weather and traffic in ${neighborhood}, ${city} for this Friday.`,
-  });
-  return response.text || "Weather is clear. Traffic is moderate.";
-};
-
 export const discoverTrends = async (city: string): Promise<string[]> => {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Find 3 trending local news topics in ${city}, India today. Return as comma separated list.`,
-    config: { tools: [{ googleSearch: {} }] }
+    contents: `Find 5 major breaking news headlines specifically for ${city} and West Bengal from the last 24 hours. Focus on politics, infrastructure, sports, or local events.`,
+    config: { 
+      tools: [{ googleSearch: {} }] 
+    }
   });
-  return (response.text || "").split(',').map(s => s.trim());
+  
+  // Clean up the response to get a list of topics
+  const text = response.text || "";
+  return text.split('\n')
+    .filter(line => line.trim().length > 10)
+    .map(line => line.replace(/^\d+\.\s*/, '').trim())
+    .slice(0, 5);
 };
