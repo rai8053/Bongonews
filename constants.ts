@@ -1,10 +1,9 @@
-
 import { CityConfig, NewsItem } from './types';
 
 export const APP_NAME = "বঙ্গ নিউজ";
 
-// Set your VPS IP here
-export const API_BASE_URL = "http://154.12.117.1"; 
+// Updated to the IP provided: 154.12.117.202
+export const API_BASE_URL = "http://154.12.117.202"; 
 
 export const CITIES: CityConfig[] = [
   {
