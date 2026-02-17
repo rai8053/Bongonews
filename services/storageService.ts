@@ -1,12 +1,28 @@
 
 import { NewsItem, Comment } from '../types';
-import { INITIAL_NEWS } from '../constants';
+import { INITIAL_NEWS, API_BASE_URL } from '../constants';
 
 const STORAGE_KEY = 'bongo_news_db';
 const BOOKMARK_KEY = 'bongo_news_bookmarks';
 const LIKED_KEY = 'bongo_news_likes'; 
 
+/**
+ * Fetch news from VPS backend if available, otherwise fallback to local storage
+ */
 export const getNews = async (): Promise<NewsItem[]> => {
+  try {
+    // Attempt to fetch from the VPS backend
+    const response = await fetch(`${API_BASE_URL}/api/news`);
+    if (response.ok) {
+      const data = await response.json();
+      // Optional: Sync back to local storage for offline access
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return data;
+    }
+  } catch (e) {
+    console.error("VPS fetch failed, falling back to local storage", e);
+  }
+
   // Fallback to Local Storage
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
@@ -24,7 +40,18 @@ export const getNewsSync = (): NewsItem[] => {
 }
 
 export const saveNewsItem = async (item: NewsItem): Promise<void> => {
-  // Save Locally
+  // 1. Save to VPS if possible
+  try {
+    await fetch(`${API_BASE_URL}/api/news`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    });
+  } catch (e) {
+    console.warn("Could not sync with VPS", e);
+  }
+
+  // 2. Save Locally
   const current = getNewsSync();
   // Ensure new items have default counts
   if (!item.views) item.views = 0;
@@ -42,7 +69,11 @@ export const getNewsById = (id: string): NewsItem | undefined => {
 
 // --- Engagement System ---
 
-export const incrementView = (id: string): void => {
+export const incrementView = async (id: string): Promise<void> => {
+  try {
+    await fetch(`${API_BASE_URL}/api/news/${id}/view`, { method: 'POST' });
+  } catch (e) { /* ignore */ }
+
   const allNews = getNewsSync();
   const updated = allNews.map(n => {
     if (n.id === id) {
@@ -54,6 +85,13 @@ export const incrementView = (id: string): void => {
 };
 
 export const addComment = (newsId: string, comment: Comment): NewsItem | null => {
+  // Sync with VPS
+  fetch(`${API_BASE_URL}/api/news/${newsId}/comment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(comment)
+  }).catch(() => {});
+
   const allNews = getNewsSync();
   let updatedItem = null;
   
@@ -94,6 +132,9 @@ export const toggleLikeNews = (id: string): { success: boolean; isLiked: boolean
     likedIds.push(id);
     localStorage.setItem(LIKED_KEY, JSON.stringify(likedIds));
   }
+
+  // Optional VPS sync for likes
+  fetch(`${API_BASE_URL}/api/news/${id}/like`, { method: 'POST' }).catch(() => {});
 
   return { success: true, isLiked: !isLiked, newCount };
 };
