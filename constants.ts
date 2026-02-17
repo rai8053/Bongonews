@@ -1,29 +1,32 @@
 
 import { CityConfig, NewsItem } from './types';
 
-export const APP_NAME = "LocalBeat";
+export const APP_NAME = "বঙ্গ নিউজ";
+
+// Set your VPS IP here
+export const API_BASE_URL = "http://154.12.117.1"; 
 
 export const CITIES: CityConfig[] = [
   {
-    id: 'bengaluru',
-    name: 'Bengaluru',
-    neighborhoods: ['Koramangala', 'Indiranagar', 'HSR Layout', 'Whitefield'],
-    rssFeeds: ['TOI Bengaluru', 'Deccan Herald'],
-    eventSources: ['Eventbrite Bengaluru']
+    id: 'kolkata',
+    name: 'কলকাতা',
+    neighborhoods: ['সল্টলেক', 'নিউ টাউন', 'বালিগঞ্জ', 'গড়িয়াহাট'],
+    rssFeeds: ['Anandabazar Patrika', 'Sangbad Pratidin'],
+    eventSources: ['Kolkata Events']
   },
   {
-    id: 'mumbai',
-    name: 'Mumbai',
-    neighborhoods: ['Bandra', 'Andheri', 'Colaba', 'Juhu'],
-    rssFeeds: ['Hindustan Times Mumbai'],
-    eventSources: ['BookMyShow Mumbai']
+    id: 'howrah',
+    name: 'হাওড়া',
+    neighborhoods: ['শিবপুর', 'বেলুড়', 'বালি'],
+    rssFeeds: ['Local Howrah News'],
+    eventSources: ['Howrah Events']
   },
   {
-    id: 'delhi',
-    name: 'Delhi',
-    neighborhoods: ['South Delhi', 'Connaught Place', 'Dwarka'],
-    rssFeeds: ['NDTV Delhi'],
-    eventSources: ['EventsHigh Delhi']
+    id: 'siliguri',
+    name: 'শিলিগুড়ি',
+    neighborhoods: ['প্রধান নগর', 'মাটিগাড়া', 'ভক্তিনগর'],
+    rssFeeds: ['Uttarbanga Sambad'],
+    eventSources: ['North Bengal Events']
   }
 ];
 
@@ -33,49 +36,33 @@ const getAiImage = (prompt: string) =>
 export const INITIAL_NEWS: NewsItem[] = [
   {
     id: 'b1',
-    headline: 'New Metro Line connecting Silk Board to KR Puram opens Friday',
-    previewText: 'The long-awaited Outer Ring Road metro line is finally opening its doors to commuters...',
-    content: 'Commuters in Bengaluru have a reason to celebrate. The BMRCL confirmed that the ORR line is operational. This will reduce travel time by 40 minutes for techies working in HSR and Bellandur.',
+    headline: 'কলকাতা মেট্রোর নতুন রুট উদ্বোধন হচ্ছে আগামী শুক্রবার',
+    previewText: 'শহরবাসীর দীর্ঘ প্রতীক্ষার অবসান ঘটিয়ে চালু হচ্ছে নতুন মেট্রো পরিষেবা...',
+    content: 'কলকাতা মেট্রো রেল কর্তৃপক্ষ জানিয়েছে যে আগামী শুক্রবার থেকে নতুন মেট্রো রুটটি জনসাধারণের জন্য খুলে দেওয়া হবে। এর ফলে যাতায়াতের সময় অনেকটা কমবে এবং যাত্রীরা স্বাচ্ছন্দ্যে ভ্রমণ করতে পারবেন।',
     type: 'STORY',
-    category: 'Top Stories',
-    city: 'bengaluru',
-    neighborhood: 'HSR Layout',
-    imageUrl: getAiImage('Modern Bangalore Metro train on elevated track blue sky'),
+    category: 'সেরা খবর',
+    city: 'kolkata',
+    neighborhood: 'সল্টলেক',
+    imageUrl: getAiImage('Modern Kolkata Metro train blue sky city background'),
     createdAt: Date.now(),
-    readTime: '2 min',
-    views: 1500,
-    likes: 45,
+    readTime: '২ মিনিট',
+    views: 1200,
+    likes: 38,
     comments: []
   },
   {
     id: 'b2',
-    headline: 'Sunday Soul Sante: Fashion & Art Market',
-    previewText: 'Head to Jayamahal Palace this Sunday for the city\'s favorite flea market...',
-    content: 'Experience the best of local art, music, and food. Over 200 stalls featuring hand-crafted goods.',
+    headline: 'শিলিগুড়িতে শুরু হচ্ছে হস্তশিল্প মেলা',
+    previewText: 'আগামী সপ্তাহ থেকে কাঞ্চনজঙ্ঘা স্টেডিয়াম চত্বরে শুরু হবে এই মেলা...',
+    content: 'বাংলার বিভিন্ন প্রান্তের হস্তশিল্পীদের তৈরি পণ্য নিয়ে শুরু হচ্ছে এই মেলা। স্থানীয় সংস্কৃতির প্রসারে এই উদ্যোগ নেওয়া হয়েছে।',
     type: 'EVENT',
-    category: 'Weekend Events',
-    city: 'bengaluru',
-    imageUrl: getAiImage('Outdoor flea market india colorful stalls people'),
+    category: 'সাপ্তাহিক অনুষ্ঠান',
+    city: 'siliguri',
+    imageUrl: 'https://images.unsplash.com/photo-1590073844006-33379778ae09?auto=format&fit=crop&q=80&w=800',
     createdAt: Date.now(),
-    externalLink: 'https://insider.in',
-    views: 800,
-    likes: 22,
-    comments: []
-  },
-  {
-    id: 'b3',
-    headline: '50% Off at Third Wave Coffee Koramangala',
-    previewText: 'Exclusive deal for LocalBeat subscribers this weekend only...',
-    content: 'Flash this newsletter at the Koramangala 4th Block outlet to avail 1+1 on all cold brews.',
-    type: 'DEAL',
-    category: 'Local Deals',
-    city: 'bengaluru',
-    neighborhood: 'Koramangala',
-    imageUrl: getAiImage('Aesthetic coffee shop interior latte art'),
-    createdAt: Date.now(),
-    isSponsored: true,
-    views: 3000,
-    likes: 120,
+    externalLink: 'https://events.example.com',
+    views: 540,
+    likes: 15,
     comments: []
   }
 ];

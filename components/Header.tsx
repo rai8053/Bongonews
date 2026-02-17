@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapPin, Bell, User, ChevronDown } from 'lucide-react';
+import { MapPin, Bell, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CITIES } from '../constants';
 
@@ -13,15 +13,15 @@ const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
   const city = CITIES.find(c => c.id === currentCity) || CITIES[0];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-slate-900 text-white border-b border-slate-800 shadow-xl">
+    <header className="sticky top-0 z-50 w-full bg-slate-900 text-white border-b border-slate-800 shadow-xl font-bengali">
       <div className="max-w-screen-md mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
+        <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-indigo-500/20 shadow-lg group-hover:scale-105 transition-transform">
-            L
+            ব
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tighter leading-none">LOCALBEAT</span>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Weekly Digest</span>
+            <span className="text-xl font-black tracking-tighter leading-none">বঙ্গ নিউজ</span>
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">স্থানীয় ডাইজেস্ট</span>
           </div>
         </Link>
 
@@ -45,8 +45,9 @@ const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
             </div>
           </div>
           
-          <button className="p-2 text-slate-400 hover:text-white">
+          <button className="p-2 text-slate-400 hover:text-white relative">
             <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
       </div>
