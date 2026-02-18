@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { MapPin, Bell, ChevronDown, Radio } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { MapPin, ChevronDown, Settings } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { CITIES } from '../constants';
 
 interface HeaderProps {
@@ -10,6 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
+  const location = useLocation();
   const city = CITIES.find(c => c.id === currentCity) || CITIES[0];
 
   return (
@@ -22,12 +23,8 @@ const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-xl font-black tracking-tighter leading-none">বঙ্গ নিউজ</span>
-              <span className="flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-              </span>
             </div>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">লাইভ ২৪/৭</span>
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">লাইভ আপডেট</span>
           </div>
         </Link>
 
@@ -39,7 +36,6 @@ const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
               <ChevronDown className="w-3 h-3 opacity-50" />
             </button>
             <div className="absolute top-full right-0 mt-2 w-48 bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2 z-50">
-              <p className="text-[10px] font-black text-slate-400 uppercase p-2 border-b border-slate-50 mb-1">শহর নির্বাচন করুন</p>
               {CITIES.map(c => (
                 <button
                   key={c.id}
@@ -52,10 +48,12 @@ const Header: React.FC<HeaderProps> = ({ currentCity, setCity }) => {
             </div>
           </div>
           
-          <button className="p-2 text-slate-400 hover:text-white relative bg-slate-800 rounded-full border border-white/5">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>
-          </button>
+          <Link 
+            to="/admin" 
+            className={`p-2 rounded-full border border-white/5 transition ${location.pathname === '/admin' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+          >
+            <Settings className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </header>

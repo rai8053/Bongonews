@@ -11,11 +11,9 @@ const LIKED_KEY = 'bongo_news_likes';
  */
 export const getNews = async (): Promise<NewsItem[]> => {
   try {
-    // Attempt to fetch from the VPS backend
     const response = await fetch(`${API_BASE_URL}/api/news`);
     if (response.ok) {
       const data = await response.json();
-      // Optional: Sync back to local storage for offline access
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       return data;
     }
@@ -23,24 +21,26 @@ export const getNews = async (): Promise<NewsItem[]> => {
     console.error("VPS fetch failed, falling back to local storage", e);
   }
 
-  // Fallback to Local Storage
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    // Initialize with Mock Data if first time
     localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_NEWS));
     return INITIAL_NEWS;
   }
   return JSON.parse(stored);
 };
 
-// Non-Async version for immediate rendering (will be hydrated by effect)
+export const fetchFromExternalApi = async (url: string): Promise<any> => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("External API failed");
+  return await response.json();
+};
+
 export const getNewsSync = (): NewsItem[] => {
    const stored = localStorage.getItem(STORAGE_KEY);
    return stored ? JSON.parse(stored) : INITIAL_NEWS;
 }
 
 export const saveNewsItem = async (item: NewsItem): Promise<void> => {
-  // 1. Save to VPS if possible
   try {
     await fetch(`${API_BASE_URL}/api/news`, {
       method: 'POST',
@@ -51,15 +51,19 @@ export const saveNewsItem = async (item: NewsItem): Promise<void> => {
     console.warn("Could not sync with VPS", e);
   }
 
-  // 2. Save Locally
   const current = getNewsSync();
-  // Ensure new items have default counts
   if (!item.views) item.views = 0;
   if (!item.likes) item.likes = 0;
   if (!item.comments) item.comments = [];
   
   const updated = [item, ...current];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+};
+
+export const saveMultipleNewsItems = async (items: NewsItem[]): Promise<void> => {
+  for (const item of items) {
+    await saveNewsItem(item);
+  }
 };
 
 export const getNewsById = (id: string): NewsItem | undefined => {
@@ -85,7 +89,6 @@ export const incrementView = async (id: string): Promise<void> => {
 };
 
 export const addComment = (newsId: string, comment: Comment): NewsItem | null => {
-  // Sync with VPS
   fetch(`${API_BASE_URL}/api/news/${newsId}/comment`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -133,7 +136,6 @@ export const toggleLikeNews = (id: string): { success: boolean; isLiked: boolean
     localStorage.setItem(LIKED_KEY, JSON.stringify(likedIds));
   }
 
-  // Optional VPS sync for likes
   fetch(`${API_BASE_URL}/api/news/${id}/like`, { method: 'POST' }).catch(() => {});
 
   return { success: true, isLiked: !isLiked, newCount };
